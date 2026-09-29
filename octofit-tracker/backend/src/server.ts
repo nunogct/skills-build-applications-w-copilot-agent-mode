@@ -8,6 +8,10 @@ import workoutsRouter from './routes/workouts.js'
 
 const app = express()
 const port = Number(process.env.PORT ?? 8000)
+const codespaceName = process.env.CODESPACE_NAME
+const baseUrl = codespaceName
+  ? `https://${codespaceName}-8000.app.github.dev`
+  : 'http://localhost:8000'
 
 app.use(express.json())
 app.use('/api/users', usersRouter)
@@ -20,6 +24,7 @@ app.get('/api/health', (_request, response) => {
   response.json({
     status: 'ok',
     database: db.readyState === 1 ? 'connected' : 'connecting',
+    baseUrl,
   })
 })
 
@@ -37,7 +42,7 @@ async function start() {
   try {
     await connectDatabase()
     app.listen(port, '0.0.0.0', () => {
-      console.log(`OctoFit API listening on port ${port}`)
+      console.log(`OctoFit API listening at ${baseUrl} on port ${port}`)
     })
   } catch (error) {
     console.error('Error connecting to octofit_db:', error)
